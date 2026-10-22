@@ -20,13 +20,13 @@ handle "snapshot.match" with match
   format: [v] ~> serialize(v, "json"),
 
   match: [name, actual, expected] ~> if actual == expected {
-    tag.tag("ok", { value: true })
+    hash_map.set({ value: true }, "__tag__", "ok")
   } else {
-    tag.tag("err", { value: {
+    hash_map.set({ value: {
       message: "snapshot " + name + " mismatch",
       assertion: "snapshot",
       expected: serialize(expected, "json"),
       actual: serialize(actual, "json")
-    }})
+    }}, "__tag__", "err")
   }
 }

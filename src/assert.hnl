@@ -23,55 +23,55 @@ op "assert.contains" : (Array, Value) -> Value
 
 {
   equal: [a, b] ~> if a == b {
-    tag.tag("ok", { value: b })
+    hash_map.set({ value: b }, "__tag__", "ok")
   } else {
-    tag.tag("err", { value: {
+    hash_map.set({ value: {
       message: "assertion failed: " + serialize(a, "json") + " != " + serialize(b, "json"),
       assertion: "equal",
       expected: serialize(b, "json"),
       actual: serialize(a, "json")
-    }})
+    }}, "__tag__", "err")
   },
 
   not_equal: [a, b] ~> if a != b {
-    tag.tag("ok", { value: b })
+    hash_map.set({ value: b }, "__tag__", "ok")
   } else {
-    tag.tag("err", { value: {
+    hash_map.set({ value: {
       message: "assertion failed: " + serialize(a, "json") + " == " + serialize(b, "json"),
       assertion: "not_equal",
       expected: "values to differ",
       actual: serialize(a, "json")
-    }})
+    }}, "__tag__", "err")
   },
 
   "true": x ~> if x == true {
-    tag.tag("ok", { value: x })
+    hash_map.set({ value: x }, "__tag__", "ok")
   } else {
-    tag.tag("err", { value: {
+    hash_map.set({ value: {
       message: "assertion failed: expected true",
       assertion: "true",
       actual: serialize(x, "json")
-    }})
+    }}, "__tag__", "err")
   },
 
   "false": x ~> if x == false {
-    tag.tag("ok", { value: x })
+    hash_map.set({ value: x }, "__tag__", "ok")
   } else {
-    tag.tag("err", { value: {
+    hash_map.set({ value: {
       message: "assertion failed: expected false",
       assertion: "false",
       actual: serialize(x, "json")
-    }})
+    }}, "__tag__", "err")
   },
 
   contains: [xs, x] ~> if array.contains(xs, x) {
-    tag.tag("ok", { value: x })
+    hash_map.set({ value: x }, "__tag__", "ok")
   } else {
-    tag.tag("err", { value: {
+    hash_map.set({ value: {
       message: "assertion failed: " + serialize(x, "json") + " not in " + serialize(xs, "json"),
       assertion: "contains",
       expected: serialize(x, "json"),
       actual: serialize(xs, "json")
-    }})
+    }}, "__tag__", "err")
   }
 }

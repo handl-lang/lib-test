@@ -30,7 +30,7 @@ do {
     run: [f, count, seed] ~> {
       s :: if seed == null { 0 } else { seed }
       if count <= 0 {
-        tag.tag("err", { value: { message: "count must be positive" } })
+        hash_map.set({ value: { message: "count must be positive" } }, "__tag__", "err")
       } else {
         while { i: 0, failures: 0, first_error: null } {
           [i, failures, first_error] ~> {

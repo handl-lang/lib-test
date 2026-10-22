@@ -30,7 +30,7 @@ do {
     for_all: [f, count, seed] ~> {
       s :: if seed == null { 0 } else { seed }
       if count <= 0 {
-        tag.tag("err", { value: { message: "count must be positive" } })
+        hash_map.set({ value: { message: "count must be positive" } }, "__tag__", "err")
       } else {
         while { i: 0 } {
           [i] ~> {
@@ -38,18 +38,18 @@ do {
             r :: combinators.apply(f, inputs)
             t :: tag.tag_of(r)
             if i == count {
-              { out: tag.tag("ok", { value: true }) }
+              { out: hash_map.set({ value: true }, "__tag__", "ok") }
             } else if t == "err" {
-              { out: tag.tag("err", { value: {
+              { out: hash_map.set({ value: {
                 message: "property failed",
                 counterexample: inputs,
                 cause: serialize(tag.untag(r).value, "json")
-              }})}
+              }}, "__tag__", "err")}
             } else if r != true {
-              { out: tag.tag("err", { value: {
+              { out: hash_map.set({ value: {
                 message: "property returned false",
                 counterexample: inputs
-              }})}
+              }}, "__tag__", "err")}
             } else {
               { state: { i: i + 1 } }
             }

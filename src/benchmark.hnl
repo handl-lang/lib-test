@@ -15,7 +15,7 @@ handle "benchmark.run" with run
   run: [f, iterations, args] ~> {
     inputs :: if args == null { [] } else { args }
     if iterations <= 0 {
-      tag.tag("err", { value: { message: "iterations must be positive" } })
+      hash_map.set({ value: { message: "iterations must be positive" } }, "__tag__", "err")
     } else {
       start :: time.instant_ns()
       last :: while { i: 0, r: null } {
@@ -28,10 +28,10 @@ handle "benchmark.run" with run
       end :: time.instant_ns()
       total_ms :: (end - start) / 1000000.0
       if tag.tag_of(last) == "err" {
-        tag.tag("err", { value: {
+        hash_map.set({ value: {
           message: "benchmark function failed",
           cause: serialize(tag.untag(last).value, "json")
-        }})
+        }}, "__tag__", "err")
       } else {
         {
           iterations: iterations,
