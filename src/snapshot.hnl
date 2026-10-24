@@ -3,6 +3,9 @@
 --- `snapshot.format` serializes a value to JSON; `snapshot.match`
 --- compares an actual value to an expected snapshot and returns an
 --- `ok` result on a match or an `err` result describing the mismatch.
+--- Results mint the canonical `__ctor__` object shape (ADR-0152 §2,
+--- phase-3 WS-F) — the same record lib-result's `ok`/`err` produce —
+--- so `match` dispatches on ctor-sym identity, never a `__tag__` string.
 
 from "serialize" import { serialize }
 
@@ -16,17 +19,30 @@ op "snapshot.match" : (String, Value, Value) -> Value
 handle "snapshot.format" with format
 handle "snapshot.match" with match
 
-{
-  format: [v] ~> serialize(v, "json"),
+do {
+  ok_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),
+                    "value": v,
+                    "type": { "__former__": sym.seeded("data.Result"),
+                              "indices": [null, null] } })
+  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+                     "value": v,
+                     "type": { "__former__": sym.seeded("data.Result"),
+                               "indices": [null, null] } })
 
-  match: [name, actual, expected] ~> if actual == expected {
-    hash_map.set({ value: true }, "__tag__", "ok")
-  } else {
-    hash_map.set({ value: {
-      message: "snapshot " + name + " mismatch",
-      assertion: "snapshot",
-      expected: serialize(expected, "json"),
-      actual: serialize(actual, "json")
-    }}, "__tag__", "err")
+  {
+    format: [v] ~> serialize(v, "json"),
+
+    -- quoted key: `match` is a keyword; inside a `do` block the bare
+    -- `match:` entry reads as the match form.
+    "match": [name, actual, expected] ~> if actual == expected {
+      ok_res(true)
+    } else {
+      err_res({
+        message: "snapshot " + name + " mismatch",
+        assertion: "snapshot",
+        expected: serialize(expected, "json"),
+        actual: serialize(actual, "json")
+      })
+    }
   }
 }

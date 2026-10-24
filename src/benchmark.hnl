@@ -1,7 +1,10 @@
 --- Benchmarking (ADR-0092).
 ---
 --- `benchmark.run` runs the function `iterations` times and reports
---- elapsed wall-clock time in milliseconds.
+--- elapsed wall-clock time in milliseconds. Results mint the canonical
+--- `__ctor__` object shape (ADR-0152 §2, phase-3 WS-F) — the same
+--- record lib-result's `ok`/`err` produce — so `match` dispatches on
+--- ctor-sym identity, never a `__tag__` string.
 
 from "serialize" import { serialize }
 
@@ -11,33 +14,39 @@ op "benchmark.run" : (Function, Number, Array) -> Value
 
 handle "benchmark.run" with run
 
-{
-  run: [f, iterations, args] ~> {
-    inputs :: if args == null { [] } else { args }
-    if iterations <= 0 {
-      hash_map.set({ value: { message: "iterations must be positive" } }, "__tag__", "err")
-    } else {
-      start :: time.instant_ns()
-      last :: while { i: 0, r: null } {
-        [i, r] ~> if i == iterations {
-          { out: r }
-        } else {
-          { state: { i: i + 1, r: combinators.apply(f, inputs) } }
-        }
-      }
-      end :: time.instant_ns()
-      total_ms :: (end - start) / 1000000.0
-      if tag.tag_of(last) == "err" {
-        hash_map.set({ value: {
-          message: "benchmark function failed",
-          cause: serialize(tag.untag(last).value, "json")
-        }}, "__tag__", "err")
+do {
+  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+                     "value": v,
+                     "type": { "__former__": sym.seeded("data.Result"),
+                               "indices": [null, null] } })
+
+  {
+    run: [f, iterations, args] ~> {
+      inputs :: if args == null { [] } else { args }
+      if iterations <= 0 {
+        err_res({ message: "iterations must be positive" })
       } else {
-        {
-          iterations: iterations,
-          total_ms: total_ms,
-          mean_ms: total_ms / iterations,
-          result: last
+        start :: time.instant_ns()
+        last :: while { i: 0, r: null } {
+          [i, r] ~> if i == iterations {
+            { out: r }
+          } else {
+            { state: { i: i + 1, r: combinators.apply(f, inputs) } }
+          }
+        }
+        end :: time.instant_ns()
+        total_ms :: (end - start) / 1000000.0
+        match last {
+          err(e): err_res({
+            message: "benchmark function failed",
+            cause: serialize(e, "json")
+          }),
+          _: {
+            iterations: iterations,
+            total_ms: total_ms,
+            mean_ms: total_ms / iterations,
+            result: last
+          }
         }
       }
     }

@@ -2,7 +2,10 @@
 ---
 --- `property.for_all` runs the predicate function `count` times with
 --- deterministic seeded floats.  The predicate must return `true` to
---- pass and an `err`-tagged result to fail.
+--- pass and an `err` result to fail. Results mint the canonical
+--- `__ctor__` object shape (ADR-0152 §2, phase-3 WS-F) — the same
+--- record lib-result's `ok`/`err` produce — and dispatch is ctor-sym
+--- identity via `match`, never a `__tag__` string.
 
 from "serialize" import { serialize }
 
@@ -26,32 +29,43 @@ do {
     }
   }
 
+  ok_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),
+                    "value": v,
+                    "type": { "__former__": sym.seeded("data.Result"),
+                              "indices": [null, null] } })
+  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+                     "value": v,
+                     "type": { "__former__": sym.seeded("data.Result"),
+                               "indices": [null, null] } })
+
   {
     for_all: [f, count, seed] ~> {
       s :: if seed == null { 0 } else { seed }
       if count <= 0 {
-        hash_map.set({ value: { message: "count must be positive" } }, "__tag__", "err")
+        err_res({ message: "count must be positive" })
       } else {
         while { i: 0 } {
           [i] ~> {
             inputs :: generate_inputs(f, s, i)
             r :: combinators.apply(f, inputs)
-            t :: tag.tag_of(r)
             if i == count {
-              { out: hash_map.set({ value: true }, "__tag__", "ok") }
-            } else if t == "err" {
-              { out: hash_map.set({ value: {
-                message: "property failed",
-                counterexample: inputs,
-                cause: serialize(tag.untag(r).value, "json")
-              }}, "__tag__", "err")}
-            } else if r != true {
-              { out: hash_map.set({ value: {
-                message: "property returned false",
-                counterexample: inputs
-              }}, "__tag__", "err")}
+              { out: ok_res(true) }
             } else {
-              { state: { i: i + 1 } }
+              match r {
+                err(e): { out: err_res({
+                  message: "property failed",
+                  counterexample: inputs,
+                  cause: serialize(e, "json")
+                })},
+                _: if r != true {
+                  { out: err_res({
+                    message: "property returned false",
+                    counterexample: inputs
+                  })}
+                } else {
+                  { state: { i: i + 1 } }
+                }
+              }
             }
           }
         }

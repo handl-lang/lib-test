@@ -1,7 +1,15 @@
 --- Pure-handl assertion helpers (ADR-0092).
 ---
 --- All helpers build `ok`/`err` result values directly; they do not use
---- the engine's `assert` keyword and never raise.
+--- the engine's `assert` keyword and never raise. Results mint the
+--- canonical `__ctor__` object shape (ADR-0152 §2, phase-3 WS-F) — the
+--- same record `data Result :: ok(value) | err(error)` produces and
+--- lib-result's `ok`/`err` mint by hand — so `match` dispatches on
+--- ctor-sym identity (`match r { ok(v): …, err(e): … }`), never a
+--- `__tag__` string. The mint stays manual (`sym.seeded`) rather than a
+--- `data` declaration or `from "result" import` because these modules
+--- load as `HandlModule`s whose binds carry only declared imports —
+--- `sym` is a floor native, resolvable through every host module chain.
 
 from "serialize" import { serialize }
 
@@ -21,57 +29,68 @@ op "assert.false" : Value -> Value
 
 op "assert.contains" : (Array, Value) -> Value
 
-{
-  equal: [a, b] ~> if a == b {
-    hash_map.set({ value: b }, "__tag__", "ok")
-  } else {
-    hash_map.set({ value: {
-      message: "assertion failed: " + serialize(a, "json") + " != " + serialize(b, "json"),
-      assertion: "equal",
-      expected: serialize(b, "json"),
-      actual: serialize(a, "json")
-    }}, "__tag__", "err")
-  },
+do {
+  ok_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),
+                    "value": v,
+                    "type": { "__former__": sym.seeded("data.Result"),
+                              "indices": [null, null] } })
+  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+                     "value": v,
+                     "type": { "__former__": sym.seeded("data.Result"),
+                               "indices": [null, null] } })
 
-  not_equal: [a, b] ~> if a != b {
-    hash_map.set({ value: b }, "__tag__", "ok")
-  } else {
-    hash_map.set({ value: {
-      message: "assertion failed: " + serialize(a, "json") + " == " + serialize(b, "json"),
-      assertion: "not_equal",
-      expected: "values to differ",
-      actual: serialize(a, "json")
-    }}, "__tag__", "err")
-  },
+  {
+    equal: [a, b] ~> if a == b {
+      ok_res(b)
+    } else {
+      err_res({
+        message: "assertion failed: " + serialize(a, "json") + " != " + serialize(b, "json"),
+        assertion: "equal",
+        expected: serialize(b, "json"),
+        actual: serialize(a, "json")
+      })
+    },
 
-  "true": x ~> if x == true {
-    hash_map.set({ value: x }, "__tag__", "ok")
-  } else {
-    hash_map.set({ value: {
-      message: "assertion failed: expected true",
-      assertion: "true",
-      actual: serialize(x, "json")
-    }}, "__tag__", "err")
-  },
+    not_equal: [a, b] ~> if a != b {
+      ok_res(b)
+    } else {
+      err_res({
+        message: "assertion failed: " + serialize(a, "json") + " == " + serialize(b, "json"),
+        assertion: "not_equal",
+        expected: "values to differ",
+        actual: serialize(a, "json")
+      })
+    },
 
-  "false": x ~> if x == false {
-    hash_map.set({ value: x }, "__tag__", "ok")
-  } else {
-    hash_map.set({ value: {
-      message: "assertion failed: expected false",
-      assertion: "false",
-      actual: serialize(x, "json")
-    }}, "__tag__", "err")
-  },
+    "true": x ~> if x == true {
+      ok_res(x)
+    } else {
+      err_res({
+        message: "assertion failed: expected true",
+        assertion: "true",
+        actual: serialize(x, "json")
+      })
+    },
 
-  contains: [xs, x] ~> if array.contains(xs, x) {
-    hash_map.set({ value: x }, "__tag__", "ok")
-  } else {
-    hash_map.set({ value: {
-      message: "assertion failed: " + serialize(x, "json") + " not in " + serialize(xs, "json"),
-      assertion: "contains",
-      expected: serialize(x, "json"),
-      actual: serialize(xs, "json")
-    }}, "__tag__", "err")
+    "false": x ~> if x == false {
+      ok_res(x)
+    } else {
+      err_res({
+        message: "assertion failed: expected false",
+        assertion: "false",
+        actual: serialize(x, "json")
+      })
+    },
+
+    contains: [xs, x] ~> if array.contains(xs, x) {
+      ok_res(x)
+    } else {
+      err_res({
+        message: "assertion failed: " + serialize(x, "json") + " not in " + serialize(xs, "json"),
+        assertion: "contains",
+        expected: serialize(x, "json"),
+        actual: serialize(xs, "json")
+      })
+    }
   }
 }

@@ -2,9 +2,12 @@
 ---
 --- `test.run` executes an array of test cases and returns a report.
 --- Each case is `{ name, body, args? }`; the body is a function value
---- and must return a non-`err` value to pass.  An `err`-tagged result
---- is treated as a failure and its payload is serialized into the
---- `error` field.
+--- and must return a non-`err` value to pass.  An `err` result is
+--- treated as a failure and its payload is serialized into the
+--- `error` field. Dispatch is ctor-sym identity via `match`
+--- (ADR-0152 §2, phase-3 WS-F): the `err(e)` arm covers both the
+--- canonical `__ctor__` object lib-result mints and the host-minted
+--- `{"__tag__": "err"}` assert-channel envelope.
 
 from "serialize" import { serialize }
 
@@ -20,8 +23,8 @@ do {
     body :: c.body
     args :: if c.args == null { [] } else { c.args }
     result :: combinators.apply(body, args)
-    pass :: tag.tag_of(result) != "err"
-    error :: if pass { null } else { serialize(tag.untag(result).value, "json") }
+    pass :: match result { err(_): false, _: true }
+    error :: match result { err(e): serialize(e, "json"), _: null }
     new_results :: [...results, { name: name, pass: pass, error: error }]
     new_passed :: if pass { passed + 1 } else { passed }
     new_failed :: if pass { failed } else { failed + 1 }
