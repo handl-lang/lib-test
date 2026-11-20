@@ -2,9 +2,11 @@
 name = "handl-lib-test"
 version = "0.1.0"
 edition = "2024"
-description = "test: libc clock_gettime backend for the time contract — Handl stdlib port (ADR-0128 split)."
-license = "MIT OR Apache-2.0"
+description = "test: Handl stdlib port — the test framework library."
+license = "MIT"
 repository = "https://github.com/handl-lang/lib-test"
+homepage = "https://github.com/handl-lang/lib-test"
+readme = "README.md"
 
 # Const-only: pure handl.
 [dependencies]

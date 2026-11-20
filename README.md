@@ -1,8 +1,25 @@
 # lib-test
 
-test framework library (assert/property/fuzz/snapshot) — Handl stdlib port
+Test framework library (assert/property/fuzz/snapshot) — Handl stdlib port.
 
-Part of the `handl-lang` org split (ADR-0128); moved from `kit-canonical/handl-packages/test/`.
+## Layout
+
+```text
+src/        the .hnl sources (+ lib.rs const export)
+pkg.hnl     package manifest — modules, deps, description, license
+Cargo.toml  the const-only crate manifest
+xtask/      cargo xtask gate (fmt → clippy → test → doc)
+scripts/hnl-gate.sh   the gate
+ci.sh       bupha entry
+```
+
+## Gate
+
+```bash
+HNL=../host-cli/target/debug/hnl scripts/hnl-gate.sh
+```
+
+The Rust crate gates via `cargo xtask gate`.
 
 ## License
 
