@@ -26,7 +26,7 @@ do {
       if iterations <= 0 {
         err_res({ message: "iterations must be positive" })
       } else {
-        start :: time.instant_ns()
+        start :: posix.instant_ns()
         last :: while { i: 0, r: null } {
           [i, r] ~> if i == iterations {
             { out: r }
@@ -34,7 +34,7 @@ do {
             { state: { i: i + 1, r: combinators.apply(f, inputs) } }
           }
         }
-        end :: time.instant_ns()
+        end :: posix.instant_ns()
         total_ms :: (end - start) / 1000000.0
         match last {
           err(e): err_res({
