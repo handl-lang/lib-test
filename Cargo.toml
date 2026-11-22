@@ -1,0 +1,12 @@
+[package]
+name = "handl-lib-test"
+version = "0.1.0"
+edition = "2024"
+description = "test: Handl stdlib port — the test framework library."
+license = "MIT"
+repository = "https://github.com/handl-lang/lib-test"
+homepage = "https://github.com/handl-lang/lib-test"
+readme = "README.md"
+
+# Const-only: pure handl.
+[dependencies]
