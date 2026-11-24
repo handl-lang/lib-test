@@ -15,27 +15,27 @@ op "benchmark.run" : (Function, Number, Array) -> Value
 handle "benchmark.run" with run
 
 do {
-  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+  err_res := v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
                      "value": v,
                      "type": { "__former__": sym.seeded("data.Result"),
                                "indices": [null, null] } })
 
   {
     run: [f, iterations, args] ~> {
-      inputs :: if args == null { [] } else { args }
+      inputs := if args == null { [] } else { args }
       if iterations <= 0 {
         err_res({ message: "iterations must be positive" })
       } else {
-        start :: posix.instant_ns()
-        last :: while { i: 0, r: null } {
+        start := posix.instant_ns()
+        last := while { i: 0, r: null } {
           [i, r] ~> if i == iterations {
             { out: r }
           } else {
             { state: { i: i + 1, r: combinators.apply(f, inputs) } }
           }
         }
-        end :: posix.instant_ns()
-        total_ms :: (end - start) / 1000000.0
+        end := posix.instant_ns()
+        total_ms := (end - start) / 1000000.0
         match last {
           err(e): err_res({
             message: "benchmark function failed",

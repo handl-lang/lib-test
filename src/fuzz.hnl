@@ -15,7 +15,7 @@ op "fuzz.run" : (Function, Number, Number) -> Value
 handle "fuzz.run" with run
 
 do {
-  generate_inputs :: [f, s, i] ~> {
+  generate_inputs := [f, s, i] ~> {
     while { j: 0, acc: [] } {
       [j, acc] ~> if j == array.len(f.params) {
         { out: acc }
@@ -28,27 +28,27 @@ do {
     }
   }
 
-  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+  err_res := v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
                      "value": v,
                      "type": { "__former__": sym.seeded("data.Result"),
                                "indices": [null, null] } })
 
   {
     run: [f, count, seed] ~> {
-      s :: if seed == null { 0 } else { seed }
+      s := if seed == null { 0 } else { seed }
       if count <= 0 {
         err_res({ message: "count must be positive" })
       } else {
         while { i: 0, failures: 0, first_error: null } {
           [i, failures, first_error] ~> {
-            inputs :: generate_inputs(f, s, i)
-            r :: combinators.apply(f, inputs)
-            m :: match r {
+            inputs := generate_inputs(f, s, i)
+            r := combinators.apply(f, inputs)
+            m := match r {
               err(e): { is_err: true, payload: serialize(e, "json") },
               _: { is_err: false, payload: null }
             }
-            new_failures :: if m.is_err { failures + 1 } else { failures }
-            new_first :: if m.is_err {
+            new_failures := if m.is_err { failures + 1 } else { failures }
+            new_first := if m.is_err {
               if first_error == null { m.payload } else { first_error }
             } else {
               first_error

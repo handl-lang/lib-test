@@ -30,11 +30,11 @@ op "assert.false" : Value -> Value
 op "assert.contains" : (Array, Value) -> Value
 
 do {
-  ok_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),
+  ok_res := v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),
                     "value": v,
                     "type": { "__former__": sym.seeded("data.Result"),
                               "indices": [null, null] } })
-  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+  err_res := v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
                      "value": v,
                      "type": { "__former__": sym.seeded("data.Result"),
                                "indices": [null, null] } })

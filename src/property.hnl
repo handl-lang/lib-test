@@ -16,7 +16,7 @@ op "property.for_all" : (Function, Number, Number) -> Value
 handle "property.for_all" with for_all
 
 do {
-  generate_inputs :: [f, s, i] ~> {
+  generate_inputs := [f, s, i] ~> {
     while { j: 0, acc: [] } {
       [j, acc] ~> if j == array.len(f.params) {
         { out: acc }
@@ -29,25 +29,25 @@ do {
     }
   }
 
-  ok_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),
+  ok_res := v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),
                     "value": v,
                     "type": { "__former__": sym.seeded("data.Result"),
                               "indices": [null, null] } })
-  err_res :: v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
+  err_res := v ~> ({ "__ctor__": sym.seeded("data.Result.err"),
                      "value": v,
                      "type": { "__former__": sym.seeded("data.Result"),
                                "indices": [null, null] } })
 
   {
     for_all: [f, count, seed] ~> {
-      s :: if seed == null { 0 } else { seed }
+      s := if seed == null { 0 } else { seed }
       if count <= 0 {
         err_res({ message: "count must be positive" })
       } else {
         while { i: 0 } {
           [i] ~> {
-            inputs :: generate_inputs(f, s, i)
-            r :: combinators.apply(f, inputs)
+            inputs := generate_inputs(f, s, i)
+            r := combinators.apply(f, inputs)
             if i == count {
               { out: ok_res(true) }
             } else {
