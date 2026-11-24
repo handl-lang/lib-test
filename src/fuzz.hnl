@@ -10,7 +10,7 @@ from "serialize" import { serialize }
 
 cap "fuzz.run"
 
-op "fuzz.run" : (Function, Number, Number) -> Value
+op "fuzz.run" : (Function, Number, Number) ~> Value
 
 handle "fuzz.run" with run
 

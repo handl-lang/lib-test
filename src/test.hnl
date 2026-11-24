@@ -13,7 +13,7 @@ from "serialize" import { serialize }
 
 cap "test.run"
 
-op "test.run" : Array -> Value
+op "test.run" : Array ~> Value
 
 handle "test.run" with run
 

@@ -19,15 +19,15 @@ cap "assert.true"
 cap "assert.false"
 cap "assert.contains"
 
-op "assert.equal" : (Value, Value) -> Value
+op "assert.equal" : (Value, Value) ~> Value
 
-op "assert.not_equal" : (Value, Value) -> Value
+op "assert.not_equal" : (Value, Value) ~> Value
 
-op "assert.true" : Value -> Value
+op "assert.true" : Value ~> Value
 
-op "assert.false" : Value -> Value
+op "assert.false" : Value ~> Value
 
-op "assert.contains" : (Array, Value) -> Value
+op "assert.contains" : (Array, Value) ~> Value
 
 do {
   ok_res := v ~> ({ "__ctor__": sym.seeded("data.Result.ok"),

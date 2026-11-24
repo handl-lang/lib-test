@@ -12,9 +12,9 @@ from "serialize" import { serialize }
 cap "snapshot.format"
 cap "snapshot.match"
 
-op "snapshot.format" : Value -> String
+op "snapshot.format" : Value ~> String
 
-op "snapshot.match" : (String, Value, Value) -> Value
+op "snapshot.match" : (String, Value, Value) ~> Value
 
 handle "snapshot.format" with format
 handle "snapshot.match" with match

@@ -11,7 +11,7 @@ from "serialize" import { serialize }
 
 cap "property.for_all"
 
-op "property.for_all" : (Function, Number, Number) -> Value
+op "property.for_all" : (Function, Number, Number) ~> Value
 
 handle "property.for_all" with for_all
 
