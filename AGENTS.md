@@ -1,3 +1,37 @@
+# lib-test
+
+Test framework library — assert/property/fuzz/snapshot — Handl stdlib
+port. Pure `.hnl` plus a const-only Rust crate re-exporting the
+sources.
+
+## Layout
+
+| path | role |
+| --- | --- |
+| `src/test.hnl` | test runner surface |
+| `src/assert.hnl`, `property.hnl`, `fuzz.hnl`, `snapshot.hnl`, `benchmark.hnl` | the framework modules |
+| `src/docs/*.yml` | per-module package docs |
+| `src/lib.rs` | const-only crate re-exporting the .hnl sources |
+| `Cargo.toml`, `xtask/` | const-only crate manifest + `cargo xtask` gate |
+| `pkg.hnl`, `scripts/hnl-gate.sh`, `ci.sh` | manifest / hnl gate / bupha entry |
+
+## Contract
+
+- Pure `.hnl`; the Rust crate only re-exports sources as consts.
+- `lib-mock`'s `assert_*` helpers return this package's ok/err Result
+  shape.
+
+## Verification
+
+```bash
+HNL=../host-cli/target/debug/hnl scripts/hnl-gate.sh
+cargo xtask gate        # the const-only crate side
+```
+
+## License
+
+MIT.
+
 <!-- myco:agent-awareness -->
 
 ## Agent awareness
