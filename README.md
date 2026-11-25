@@ -10,7 +10,7 @@ pkg.hnl     package manifest — modules, deps, description, license
 Cargo.toml  the const-only crate manifest
 xtask/      cargo xtask gate (fmt → clippy → test → doc)
 scripts/hnl-gate.sh   the gate
-ci.sh       bupha entry
+workflows/gate.yaml       bupha entry (handl-gates)
 ```
 
 ## Gate
