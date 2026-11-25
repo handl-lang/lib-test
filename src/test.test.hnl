@@ -1,0 +1,31 @@
+--- test.run -- suite-execution smoke tests.
+---
+--- `run(suite)` folds `{name, body, args?}` cases into a report. Case
+--- bodies are arrow values, so this file is arrow-dialect (the shared
+--- gate skips non-canonical files; `hnl test` runs it directly — same
+--- convention as lib-concurrent-js/lib-route).
+---
+--- `assert.*`/`property`/`fuzz`/`snapshot`/`benchmark` mint Result
+--- records through the `sym.seeded`/`rand`/`serialize` host natives,
+--- which a bare package checkout does not provide — those paths surface
+--- as `call_host` failures, so they are not covered here.
+
+from "./test" import * as t
+
+suite := [
+  { name: "answer", body: (x) ~> x + 1, args: [41] },
+  { name: "const", body: (x) ~> "ok", args: [0] },
+  { body: (x) ~> x, args: [7] }
+]
+
+rep := t.run(suite)
+
+test_total := assert rep.total == 3
+
+test_all_passed := assert rep.passed == 3
+
+test_none_failed := assert rep.failed == 0
+
+test_result_names := assert rep.results[0].name == "answer"
+  && rep.results[1].name == "const"
+  && rep.results[2].name == "case 2"
