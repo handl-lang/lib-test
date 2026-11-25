@@ -1,2 +1,2 @@
 -- lib-test: package manifest.
-{ modules: ["test"], description: "Test framework library — assert, property, fuzz, snapshot.", license: "MIT" }
+{ modules: ["test"], name: "test", description: "Test framework library — assert, property, fuzz, snapshot.", license: "MIT" }
