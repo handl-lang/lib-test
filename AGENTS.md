@@ -1,8 +1,8 @@
 # lib-test
 
 Test framework library — assert/property/fuzz/snapshot — Handl stdlib
-port. Pure `.hnl` plus a const-only Rust crate re-exporting the
-sources.
+port. Pure `.hnl` package (the Rust const-shim crate was dropped in
+`2b70515`).
 
 ## Layout
 
@@ -11,13 +11,11 @@ sources.
 | `src/test.hnl` | test runner surface |
 | `src/assert.hnl`, `property.hnl`, `fuzz.hnl`, `snapshot.hnl`, `benchmark.hnl` | the framework modules |
 | `src/docs/*.yml` | per-module package docs |
-| `src/lib.rs` | const-only crate re-exporting the .hnl sources |
-| `Cargo.toml`, `xtask/` | const-only crate manifest + `cargo xtask` gate |
 | `pkg.hnl`, `scripts/hnl-gate.sh`, `workflows/gate.yaml` | manifest / hnl gate / bupha entry |
 
 ## Contract
 
-- Pure `.hnl`; the Rust crate only re-exports sources as consts.
+- Pure `.hnl` package; no Rust crate (ADR-0160 package shape).
 - `lib-mock`'s `assert_*` helpers return this package's ok/err Result
   shape.
 
@@ -25,7 +23,6 @@ sources.
 
 ```bash
 HNL=../host-cli/target/debug/hnl scripts/hnl-gate.sh
-cargo xtask gate        # the const-only crate side
 ```
 
 ## License
