@@ -13,7 +13,7 @@ sources.
 | `src/docs/*.yml` | per-module package docs |
 | `src/lib.rs` | const-only crate re-exporting the .hnl sources |
 | `Cargo.toml`, `xtask/` | const-only crate manifest + `cargo xtask` gate |
-| `pkg.hnl`, `scripts/hnl-gate.sh`, `ci.sh` | manifest / hnl gate / bupha entry |
+| `pkg.hnl`, `scripts/hnl-gate.sh`, `workflows/gate.yaml` | manifest / hnl gate / bupha entry |
 
 ## Contract
 
