@@ -17,39 +17,36 @@ op "test.run" : Array ~> Value
 
 handle "test.run" with run
 
-do {
-  run_case := [c, t, i, results, passed, failed] ~> {
-    name := if c.name == null { "case " + type.to_string(i) } else { c.name }
-    body := c.body
-    args := if c.args == null { [] } else { c.args }
-    result := combinators.apply(body, args)
-    pass := match result { err(_): false, _: true }
-    error := match result { err(e): serialize(e, "json"), _: null }
-    new_results := [...results, { name: name, pass: pass, error: error }]
-    new_passed := if pass { passed + 1 } else { passed }
-    new_failed := if pass { failed } else { failed + 1 }
-    { state: {
-      xs: t,
-      i: i + 1,
-      results: new_results,
-      passed: new_passed,
-      failed: new_failed
-    }}
-  }
 
-  {
-    run: [suite] ~> {
-      while { xs: suite, i: 0, results: [], passed: 0, failed: 0 } {
-        [xs, i, results, passed, failed] ~> match xs {
-          []: { out: {
-            total: passed + failed,
-            passed: passed,
-            failed: failed,
-            results: results
-          }},
-          [c, ...t]: run_case(c, t, i, results, passed, failed)
-        }
+run_case := [c, t, i, results, passed, failed] ~> {
+  name := if c.name == null { "case " + type.to_string(i) } else { c.name }
+  body := c.body
+  args := if c.args == null { [] } else { c.args }
+  result := combinators.apply(body, args)
+  pass := match result { err(_): false, _: true }
+  error := match result { err(e): serialize(e, "json"), _: null }
+  new_results := [...results, { name: name, pass: pass, error: error }]
+  new_passed := if pass { passed + 1 } else { passed }
+  new_failed := if pass { failed } else { failed + 1 }
+  { state: {
+    xs: t,
+    i: i + 1,
+    results: new_results,
+    passed: new_passed,
+    failed: new_failed
+  }}
+}
+
+export run := [suite] ~> {
+    while { xs: suite, i: 0, results: [], passed: 0, failed: 0 } {
+      [xs, i, results, passed, failed] ~> match xs {
+        []: { out: {
+          total: passed + failed,
+          passed: passed,
+          failed: failed,
+          results: results
+        }},
+        [c, ...t]: run_case(c, t, i, results, passed, failed)
       }
     }
   }
-}
